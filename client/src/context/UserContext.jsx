@@ -1,10 +1,12 @@
 import { createContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -94,12 +96,15 @@ export const UserProvider = ({ children }) => {
   const logout = async () => {
     try {
       await fetch("http://localhost:3000/auth/logout", {
-        method: "POST",
-        credentials: "include", // Important for cookies to be sent
+        credentials: "include",
       });
       setUser(null);
+      navigate("/login"); // Redirect to login page after logout
     } catch (error) {
       console.error("Error logging out:", error);
+      // Even if the API call fails, clear the user state and redirect
+      setUser(null);
+      navigate("/login");
     }
   };
 
