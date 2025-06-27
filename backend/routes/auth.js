@@ -41,7 +41,12 @@ router.post("/register", async (req, res) => {
       .execute();
     const token = createToken({ id: newUser[0].id });
     res.cookie("token", token, { httpOnly: true });
-    res.json({ message: "Registration successful" });
+    // Return user data without password
+    const { password: _, ...userData } = newUser[0];
+    res.json({
+      message: "Registration successful",
+      user: userData,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error registering user", error });
   }
@@ -53,7 +58,12 @@ router.post(
   (req, res) => {
     const token = createToken({ id: req.user.id });
     res.cookie("token", token, { httpOnly: true });
-    res.json({ message: "Login successful" });
+    // Return user data without password
+    const { password, ...userData } = req.user;
+    res.json({
+      message: "Login successful",
+      user: userData,
+    });
   }
 );
 

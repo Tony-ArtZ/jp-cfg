@@ -1,5 +1,6 @@
 import { useState, useContext } from "react";
 import UserContext from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -11,9 +12,10 @@ const Login = () => {
 
   const { login, loginWithGoogle } = useContext(UserContext);
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    // Clear error when user types
     if (error) setError("");
   };
 
@@ -29,6 +31,8 @@ const Login = () => {
       setError(
         result.message || "Login failed. Please check your credentials."
       );
+    } else {
+      navigate("/", { replace: true });
     }
   };
 
