@@ -1,34 +1,34 @@
 import { useState, useContext } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import UserContext from "../context/UserContext";
+import { registerSchema } from "../utils/validationSchemas";
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    age: "",
-  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { register, loginWithGoogle } = useContext(UserContext);
+  const { register: registerUser, loginWithGoogle } = useContext(UserContext);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    // Clear error when user types
-    if (error) setError("");
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    clearErrors,
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+    mode: "onChange",
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setLoading(true);
     setError("");
 
-    const result = await register(
-      formData.name,
-      formData.email,
-      formData.password,
-      formData.age
+    const result = await registerUser(
+      data.name,
+      data.email,
+      data.password,
+      data.age
     );
 
     setLoading(false);
@@ -44,7 +44,7 @@ const Register = () => {
         <h2 className="text-2xl font-bold text-center text-gray-900">
           Register
         </h2>
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label
               htmlFor="name"
@@ -54,12 +54,20 @@ const Register = () => {
             </label>
             <input
               id="name"
-              name="name"
               type="text"
-              required
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              {...register("name")}
+              onChange={(e) => {
+                register("name").onChange(e);
+                if (error) setError("");
+                clearErrors("name");
+              }}
+              className={`w-full px-3 py-2 mt-1 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                errors.name ? "border-red-300" : "border-gray-300"
+              }`}
             />
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+            )}
           </div>
           <div>
             <label
@@ -70,13 +78,23 @@ const Register = () => {
             </label>
             <input
               id="email"
-              name="email"
               type="email"
               autoComplete="email"
-              required
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              {...register("email")}
+              onChange={(e) => {
+                register("email").onChange(e);
+                if (error) setError("");
+                clearErrors("email");
+              }}
+              className={`w-full px-3 py-2 mt-1 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                errors.email ? "border-red-300" : "border-gray-300"
+              }`}
             />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.email.message}
+              </p>
+            )}
           </div>
           <div>
             <label
@@ -87,13 +105,50 @@ const Register = () => {
             </label>
             <input
               id="password"
-              name="password"
               type="password"
-              autoComplete="current-password"
-              required
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              autoComplete="new-password"
+              {...register("password")}
+              onChange={(e) => {
+                register("password").onChange(e);
+                if (error) setError("");
+                clearErrors("password");
+              }}
+              className={`w-full px-3 py-2 mt-1 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                errors.password ? "border-red-300" : "border-gray-300"
+              }`}
             />
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+          <div>
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              {...register("confirmPassword")}
+              onChange={(e) => {
+                register("confirmPassword").onChange(e);
+                if (error) setError("");
+                clearErrors("confirmPassword");
+              }}
+              className={`w-full px-3 py-2 mt-1 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                errors.confirmPassword ? "border-red-300" : "border-gray-300"
+              }`}
+            />
+            {errors.confirmPassword && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.confirmPassword.message}
+              </p>
+            )}
           </div>
           <div>
             <label
@@ -104,12 +159,20 @@ const Register = () => {
             </label>
             <input
               id="age"
-              name="age"
               type="number"
-              required
-              onChange={handleChange}
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              {...register("age")}
+              onChange={(e) => {
+                register("age").onChange(e);
+                if (error) setError("");
+                clearErrors("age");
+              }}
+              className={`w-full px-3 py-2 mt-1 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
+                errors.age ? "border-red-300" : "border-gray-300"
+              }`}
             />
+            {errors.age && (
+              <p className="mt-1 text-sm text-red-600">{errors.age.message}</p>
+            )}
           </div>
           {error && (
             <div className="p-2 text-sm text-center text-red-600 bg-red-50 rounded">
