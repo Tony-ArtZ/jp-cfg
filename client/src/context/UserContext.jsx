@@ -13,13 +13,12 @@ export const UserProvider = ({ children }) => {
       setLoading(true);
       try {
         const response = await fetch("http://localhost:3000/auth/profile", {
-          credentials: "include", // Important for cookies to be sent
+          credentials: "include",
         });
         if (response.ok) {
           const data = await response.json();
           setUser(data.user);
         } else {
-          // If response is not ok, we assume there's no valid session
           setUser(null);
         }
       } catch (error) {

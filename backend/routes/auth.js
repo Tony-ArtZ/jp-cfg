@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import passport from "passport";
 import bcrypt from "bcrypt";
+import { eq } from "drizzle-orm";
 import db from "../db/index.js";
 import { usersTable } from "../db/schema.js";
 import { createToken } from "../utils/jwt_handler.js";
@@ -82,13 +83,29 @@ router.get(
   }
 );
 
-router.get("/logout", (req, res) => {
+router.post("/logout", (req, res) => {
   res.clearCookie("token");
   res.json({ message: "Logout successful" });
 });
 
-router.get("/profile", verifyToken, (req, res) => {
-  res.json({ user: req.user });
+router.get("/profile", verifyToken, async (req, res) => {
+  try {
+    const user = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, req.user.id))
+      .limit(1)
+      .execute();
+
+    if (user.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const { password, ...userData } = user[0];
+    res.json({ user: userData });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ message: "Error fetching user profile" });
+  }
 });
 
 export default router;
